@@ -6,4 +6,5 @@ public struct NetworkInputData: INetworkInput
     public float zMovement;
     public NetworkBool isUsingItem;
     public NetworkBool hasItem;
+    public NetworkBool isBeingBoosted;
 }

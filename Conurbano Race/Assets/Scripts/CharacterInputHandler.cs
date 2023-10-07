@@ -10,9 +10,11 @@ public class CharacterInputHandler : MonoBehaviour
 
     private void Start()
     {
+        hasItem = true;
         _inputData = new NetworkInputData();
-        
-       
+        _inputData.hasItem = true;
+
+
     }
     void Update()
     {
@@ -20,17 +22,23 @@ public class CharacterInputHandler : MonoBehaviour
         _inputData.zMovement = Input.GetAxis("Vertical");
         if(!isUsingItem && hasItem && Input.GetKeyDown(KeyCode.Space))
         {
+            Debug.Log("toco space");
             isUsingItem = true;
             hasItem = false;
+            StartCoroutine(BoolChange());
         }
     }
     public NetworkInputData GetNetworkInputs()
     {
         _inputData.isUsingItem = isUsingItem;
-        isUsingItem = false;
-
         _inputData.hasItem = hasItem;
-        hasItem = false;
+
         return _inputData;
+    }
+    IEnumerator BoolChange()
+    {
+        yield return new WaitForFixedUpdate();
+        yield return new WaitForEndOfFrame();
+        isUsingItem = false;
     }
 }
