@@ -12,12 +12,24 @@ public class PlayerModel : NetworkBehaviour
     public NetworkRigidbody kartRigidbody;     // Referencia al componente Rigidbody del auto
     public Item _currentItem;
     public NetworkInputData _inputData;
+    public float rotationThreshold = 0.001f;
+    public Item[] items = new Item[3];
 
     [SerializeField] GameObject _camera;
+    float rotation;
+    private bool canRotate;
+    private bool canMove;
+    float forwardSpeed;
+
+    public GameObject inkImage;
+    public GameObject horn;
 
     public override void Spawned()
     {
-        _currentItem = new SpeedBoost();
+        items[0] = new SpeedBoost();
+        items[0] = new InkItem();
+        items[0] = new HornItem();
+        
         if (!HasInputAuthority)
         {
             _camera.SetActive(false);
@@ -25,15 +37,21 @@ public class PlayerModel : NetworkBehaviour
     }
     public void Update()
     {
+        forwardSpeed = Vector3.Dot(kartRigidbody.Rigidbody.velocity, transform.forward);
+
         
+        canRotate = Mathf.Abs(forwardSpeed) > rotationThreshold;
     }
     public override void FixedUpdateNetwork()
     {
        
         if (GetInput(out _inputData))
         {
-          
-            Move(_inputData.xMovement, _inputData.zMovement);
+            if (canMove)
+            {
+                Move(_inputData.xMovement, _inputData.zMovement);
+            }        
+            
         }
 
         if (_inputData.isUsingItem)
@@ -55,7 +73,7 @@ public class PlayerModel : NetworkBehaviour
         if (zAxis < 0)
         {
             movement = transform.forward * zAxis * speed/3 * Time.fixedDeltaTime;
-        }
+        }        
         else
         {
             movement = transform.forward * zAxis * speed * Time.fixedDeltaTime;
@@ -63,19 +81,51 @@ public class PlayerModel : NetworkBehaviour
 
         kartRigidbody.Rigidbody.AddForce(movement, ForceMode.Impulse);
 
-        float speedReduction = 50 - Mathf.Clamp(Vector3.Angle(transform.forward, kartRigidbody.Rigidbody.velocity), 0, 20);
+        float speedReduction = 100 - Mathf.Clamp(Vector3.Angle(transform.forward, kartRigidbody.Rigidbody.velocity), 0, 70);
         if(!_inputData.isBeingBoosted)
             kartRigidbody.Rigidbody.velocity = Vector3.ClampMagnitude(kartRigidbody.Rigidbody.velocity, speedReduction);
 
 
         // Aplicar fuerza al Rigidbody para mover el auto
 
-      
-        // Calcular la velocidad de rotación
-        float rotation = xAxis * rotationSpeed * Time.fixedDeltaTime;
 
-        // Rotar el auto
-        Quaternion deltaRotation = Quaternion.Euler(Vector3.up * rotation);
-        kartRigidbody.Rigidbody.MoveRotation(kartRigidbody.Rigidbody.rotation * deltaRotation);
+
+        // Calcular la velocidad de rotación
+
+        if (canRotate)
+        {
+            rotation = xAxis * rotationSpeed * Time.fixedDeltaTime;
+            // Rotar el auto
+            Quaternion deltaRotation = Quaternion.Euler(Vector3.up * rotation);
+            kartRigidbody.Rigidbody.MoveRotation(kartRigidbody.Rigidbody.rotation * deltaRotation);
+        }
+
+        
+    }
+
+    public void CouroutineActivator(IEnumerator Cou)
+    {
+        StartCoroutine(Cou);
+    }
+
+    public IEnumerator ActivateImage()
+    {
+        inkImage.SetActive(true);
+        yield return new WaitForSeconds(3.5f);
+        inkImage.SetActive(false);
+    }
+
+    public IEnumerator HornActivation()
+    {
+        horn.SetActive(true);
+        yield return new WaitForSeconds(3f);
+        horn.SetActive(false);
+    }
+
+    public IEnumerator MovementLimiting()
+    {
+        canMove = false;
+        yield return new WaitForSeconds(1.5f);
+        canMove = true;
     }
 }

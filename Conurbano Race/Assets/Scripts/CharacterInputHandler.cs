@@ -7,6 +7,7 @@ public class CharacterInputHandler : MonoBehaviour
     NetworkInputData _inputData;
     public bool isUsingItem;
     public bool hasItem;
+    public Rigidbody rb;
 
     private void Start()
     {
@@ -18,9 +19,14 @@ public class CharacterInputHandler : MonoBehaviour
     }
     void Update()
     {
-        _inputData.xMovement = Input.GetAxis("Horizontal");
+        
         _inputData.zMovement = Input.GetAxis("Vertical");
-        if(!isUsingItem && hasItem && Input.GetKeyDown(KeyCode.Space))
+        _inputData.xMovement = Input.GetAxis("Horizontal");
+
+        //if (_inputData.zMovement != 0 && (rb.velocity.z >= 3f || rb.velocity.z <= -3f))
+        //    _inputData.xMovement = Input.GetAxis("Horizontal");
+
+        if (!isUsingItem && hasItem && Input.GetKeyDown(KeyCode.Space))
         {
             Debug.Log("toco space");
             isUsingItem = true;
