@@ -13,13 +13,15 @@ public class Horn : NetworkBehaviour
     void Start()
     {
         enabled = false;
+        
     }
 
     public override void FixedUpdateNetwork()
     {
-        rb.Rigidbody.MovePosition(playerM.kartRigidbody.Rigidbody.position);
+        //  rb.Rigidbody.MovePosition(playerM.kartRigidbody.Rigidbody.position);
+       // rb.Rigidbody.AddForce(playerM.kartRigidbody.Rigidbody.velocity);
     }
-
+    
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("Hehehehehe");

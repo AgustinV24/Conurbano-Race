@@ -21,8 +21,9 @@ public class MysteryBox : NetworkBehaviour
                 player._currentItem = player.items[Random.Range(0, player.items.Length - 1)];
             }
 
-            
-            Runner.Despawn(Object);
+
+            //Runner.Despawn(Object);
+            Destroy(gameObject);
         }
     }
 

@@ -23,23 +23,27 @@ public class PlayerModel : NetworkBehaviour
     float rotation;
     private bool canRotate;
     [Networked]
-    private bool canMove { get; set;}
+    public bool canMove { get; set;}
     float forwardSpeed;
 
     public GameObject inkImage;
+    public GameObject winScreen;
+    public GameObject defeatScreen;
     public Horn hornPrefab;
     public bool hasItem;
     public string item;
-
-    PlayerManager PM;
+    
+    public PlayerManager PM;
     [SerializeField] SpawnNetworkPlayer _snp;
 
-
+    [Networked] public bool winner { get; set; }
     public override void Spawned()
     {
+        PM = FindObjectOfType<PlayerManager>();
         _snp = FindObjectOfType<SpawnNetworkPlayer>();
         _snp.OnConnected(GetComponent<NetworkPlayer>());
-        canMove = true;
+
+        //  canMove = true;
         //items[0] = new SpeedBoost();
         //items[1] = new InkItem();
         items[0] = new HornItem();
@@ -49,7 +53,15 @@ public class PlayerModel : NetworkBehaviour
             _camera.SetActive(false);
         }
 
-        PM = FindObjectOfType<PlayerManager>();
+     
+    }
+    private IEnumerator Start()
+    {
+        yield return new WaitForSeconds(.2f);
+        if (PM.GetConnectedPlayers().Count == 1)
+        {
+            transform.position = PM.spawnPoints[1].position;
+        }
     }
     public void Update()
     {
@@ -66,6 +78,13 @@ public class PlayerModel : NetworkBehaviour
             DetectOtherPLayers();
         }
     }
+
+    public void Quit()
+    {
+        Runner.Shutdown();
+        Application.Quit();
+    }
+    
     public override void FixedUpdateNetwork()
     {
        
@@ -168,6 +187,19 @@ public class PlayerModel : NetworkBehaviour
         StartCoroutine(MovementLimiting());
     }
 
+    [Rpc(RpcSources.All, RpcTargets.InputAuthority)]
+    public void RPC_End()
+    {
+        canMove = false;
+        if (winner)
+        {
+            winScreen.SetActive(true);
+        }
+        else
+        {
+            defeatScreen.SetActive(true);
+        }
+    }
     public void DetectOtherPLayers()
     {
         var col = PM.GetConnectedPlayers().ToArray();

@@ -9,7 +9,8 @@ public class PlayerManager : NetworkBehaviour
     [SerializeField]private List<NetworkPlayer> connectedPlayers = new List<NetworkPlayer>();
 
     SpawnNetworkPlayer _snp;
-
+    public Transform[] spawnPoints;
+    [Networked] public int index { get; set; }
     void Start()
     {
         _snp = FindObjectOfType<SpawnNetworkPlayer>();
@@ -22,6 +23,7 @@ public class PlayerManager : NetworkBehaviour
     
     private void OnPlayerConnected(NetworkPlayer player)
     {
+
         connectedPlayers.Add(player);        
     }
 

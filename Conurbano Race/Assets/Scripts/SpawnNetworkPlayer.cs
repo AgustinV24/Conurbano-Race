@@ -10,16 +10,17 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
 
     [SerializeField] NetworkPlayer _playerPrefab;
     public Action<NetworkPlayer> OnConnected; 
-    public Action<NetworkPlayer> OnDisconnected; 
-
-
+    public Action<NetworkPlayer> OnDisconnected;
+    public PlayerManager manager;
+    int index;
     CharacterInputHandler _characterInputs;
 
     public void OnConnectedToServer(NetworkRunner runner)
     {
-        if (runner.Topology == SimulationConfig.Topologies.Shared)
+
+        if (runner.Topology == SimulationConfig.Topologies.Shared) 
         {            
-            runner.Spawn(_playerPrefab, Vector3.zero, Quaternion.identity, runner.LocalPlayer);            
+            runner.Spawn(_playerPrefab, Vector3.zero, Quaternion.identity, runner.LocalPlayer);
         }
     }
 
