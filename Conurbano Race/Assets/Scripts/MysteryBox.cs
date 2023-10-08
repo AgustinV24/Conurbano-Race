@@ -18,12 +18,14 @@ public class MysteryBox : NetworkBehaviour
             if(!player.hasItem)
             {
                 player.hasItem = true;
-                player._currentItem = player.items[Random.Range(0, player.items.Length - 1)];
+                player._currentItem = player.items[Random.Range(0, player.items.Length)];
+                player.UpdateCanvas();
             }
 
 
             //Runner.Despawn(Object);
-            Destroy(gameObject);
+            //Destroy(gameObject);
+            gameObject.SetActive(false);
         }
     }
 

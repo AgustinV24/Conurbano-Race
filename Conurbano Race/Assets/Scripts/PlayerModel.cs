@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
 using System.Linq;
+using UnityEngine.UI;
 public class PlayerModel : NetworkBehaviour
 {
     public float speed = 10f;             // Velocidad de movimiento del auto
@@ -15,8 +16,8 @@ public class PlayerModel : NetworkBehaviour
     public NetworkInputData _inputData;
     public NetworkMecanimAnimator myAnim;
     public float rotationThreshold = 0.001f;
-    public Item[] items = new Item[1];
-
+    public Item[] items = new Item[3];
+    public Sprite[] itemsImages = new Sprite[3];
     [Networked]
     public bool call { get; set; }
 
@@ -33,7 +34,7 @@ public class PlayerModel : NetworkBehaviour
     public Horn hornPrefab;
     public bool hasItem;
     public string item;
-    
+    public Image itemImage;
     public PlayerManager PM;
     [SerializeField] SpawnNetworkPlayer _snp;
 
@@ -45,8 +46,8 @@ public class PlayerModel : NetworkBehaviour
         _snp.OnConnected(GetComponent<NetworkPlayer>());
 
         //  canMove = true;
-        //items[0] = new SpeedBoost();
-        //items[1] = new InkItem();
+        items[2] = new SpeedBoost();
+        items[1] = new InkItem();
         items[0] = new HornItem();
         
         if (!HasInputAuthority)
@@ -102,6 +103,7 @@ public class PlayerModel : NetworkBehaviour
         {            
             _currentItem.Actions(this);
             hasItem = false;
+            UpdateCanvas();
         }
     }
     void FixedUpdate()
@@ -114,6 +116,12 @@ public class PlayerModel : NetworkBehaviour
     {
         
         Vector3 movement = Vector3.zero;
+        
+
+        if(Mathf.Abs(zAxis) == 0)
+        {
+            kartRigidbody.Rigidbody.velocity = Vector3.Lerp(kartRigidbody.Rigidbody.velocity, Vector3.zero, 0.015f);
+        }
         if (zAxis < 0)
         {
             movement = transform.forward * zAxis * speed/3 * Time.fixedDeltaTime;
@@ -202,6 +210,24 @@ public class PlayerModel : NetworkBehaviour
         else
         {
             defeatScreen.SetActive(true);
+        }
+    }
+    public void UpdateCanvas()
+    {
+        if (hasItem)
+        {
+            itemImage.gameObject.SetActive(true);
+            for (int i = 0; i < items.Length; i++)
+            {
+                if(items[i] == _currentItem)
+                {
+                    itemImage.sprite = itemsImages[i];
+                }
+            }
+        }
+        else
+        {
+            itemImage.gameObject.SetActive(false);
         }
     }
     public void DetectOtherPLayers()
