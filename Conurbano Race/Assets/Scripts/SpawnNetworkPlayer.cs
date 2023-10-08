@@ -6,17 +6,20 @@ using Fusion.Sockets;
 using System;
 
 public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
-{
+{   
+
     [SerializeField] NetworkPlayer _playerPrefab;
+    public Action<NetworkPlayer> OnConnected; 
+    public Action<NetworkPlayer> OnDisconnected; 
+
 
     CharacterInputHandler _characterInputs;
 
     public void OnConnectedToServer(NetworkRunner runner)
     {
         if (runner.Topology == SimulationConfig.Topologies.Shared)
-        {
-            Debug.Log("[Custom Msg] On Connected To Server - Spawning Player as Local...");
-            runner.Spawn(_playerPrefab, Vector3.zero, Quaternion.identity, runner.LocalPlayer);
+        {            
+            runner.Spawn(_playerPrefab, Vector3.zero, Quaternion.identity, runner.LocalPlayer);            
         }
     }
 
@@ -36,6 +39,12 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
         
     }
 
+    public void OnDisconnectedFromServer(NetworkRunner runner) 
+    {
+        OnDisconnected(_playerPrefab.GetComponent<NetworkPlayer>());
+    
+    }
+
     #region Callbacks sin usar
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) { }
@@ -46,7 +55,7 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
 
-    public void OnDisconnectedFromServer(NetworkRunner runner) { }
+    
 
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
 

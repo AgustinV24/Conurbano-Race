@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
+using System.Linq;
 public class PlayerModel : NetworkBehaviour
 {
     public float speed = 10f;             // Velocidad de movimiento del auto
@@ -13,27 +14,42 @@ public class PlayerModel : NetworkBehaviour
     public Item _currentItem;
     public NetworkInputData _inputData;
     public float rotationThreshold = 0.001f;
-    public Item[] items = new Item[3];
+    public Item[] items = new Item[1];
+
+    [Networked]
+    public bool call { get; set; }
 
     [SerializeField] GameObject _camera;
     float rotation;
     private bool canRotate;
-    private bool canMove;
+    [Networked]
+    private bool canMove { get; set;}
     float forwardSpeed;
 
     public GameObject inkImage;
-    public GameObject horn;
+    public Horn hornPrefab;
+    public bool hasItem;
+    public string item;
+
+    PlayerManager PM;
+    [SerializeField] SpawnNetworkPlayer _snp;
+
 
     public override void Spawned()
     {
-        items[0] = new SpeedBoost();
-        items[0] = new InkItem();
+        _snp = FindObjectOfType<SpawnNetworkPlayer>();
+        _snp.OnConnected(GetComponent<NetworkPlayer>());
+        canMove = true;
+        //items[0] = new SpeedBoost();
+        //items[1] = new InkItem();
         items[0] = new HornItem();
         
         if (!HasInputAuthority)
         {
             _camera.SetActive(false);
         }
+
+        PM = FindObjectOfType<PlayerManager>();
     }
     public void Update()
     {
@@ -41,6 +57,14 @@ public class PlayerModel : NetworkBehaviour
 
         
         canRotate = Mathf.Abs(forwardSpeed) > rotationThreshold;
+        if(_currentItem != null)
+        item = _currentItem.ToString();
+
+        if (call)
+        {
+            call = false;
+            DetectOtherPLayers();
+        }
     }
     public override void FixedUpdateNetwork()
     {
@@ -55,9 +79,9 @@ public class PlayerModel : NetworkBehaviour
         }
 
         if (_inputData.isUsingItem)
-        {
-            Debug.Log("Entra");
+        {            
             _currentItem.Actions(this);
+            hasItem = false;
         }
     }
     void FixedUpdate()
@@ -68,7 +92,7 @@ public class PlayerModel : NetworkBehaviour
     }
     void Move(float xAxis, float zAxis)
     {
-        Debug.Log(zAxis);
+        
         Vector3 movement = Vector3.zero;
         if (zAxis < 0)
         {
@@ -86,21 +110,20 @@ public class PlayerModel : NetworkBehaviour
             kartRigidbody.Rigidbody.velocity = Vector3.ClampMagnitude(kartRigidbody.Rigidbody.velocity, speedReduction);
 
 
-        // Aplicar fuerza al Rigidbody para mover el auto
-
-
-
-        // Calcular la velocidad de rotación
+        
 
         if (canRotate)
         {
-            rotation = xAxis * rotationSpeed * Time.fixedDeltaTime;
-            // Rotar el auto
-            Quaternion deltaRotation = Quaternion.Euler(Vector3.up * rotation);
-            kartRigidbody.Rigidbody.MoveRotation(kartRigidbody.Rigidbody.rotation * deltaRotation);
+            rotation = xAxis * rotationSpeed * Time.fixedDeltaTime; 
+            
+        }
+        else
+        {
+            rotation = Mathf.Lerp(rotation, 0, 0.1f);
         }
 
-        
+        Quaternion deltaRotation = Quaternion.Euler(Vector3.up * rotation);
+        kartRigidbody.Rigidbody.MoveRotation(kartRigidbody.Rigidbody.rotation * deltaRotation);
     }
 
     public void CouroutineActivator(IEnumerator Cou)
@@ -117,15 +140,76 @@ public class PlayerModel : NetworkBehaviour
 
     public IEnumerator HornActivation()
     {
-        horn.SetActive(true);
+        Horn obj = Runner.Spawn(hornPrefab, transform.position, Quaternion.identity);        
+        obj.transform.parent = this.transform;
+        obj.playerM = this;
+        obj.sC.enabled = true;
         yield return new WaitForSeconds(3f);
-        horn.SetActive(false);
+        Runner.Despawn(obj.Object);
     }
 
     public IEnumerator MovementLimiting()
-    {
+    {        
         canMove = false;
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(100f);
         canMove = true;
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.All, InvokeLocal = false, InvokeResim = true, TickAligned = true)]
+    public void RPC_Ink()
+    {        
+        call = true;
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_Stun()
+    {
+        kartRigidbody.Rigidbody.velocity = Vector3.zero;
+        StartCoroutine(MovementLimiting());
+    }
+
+    public void DetectOtherPLayers()
+    {
+        var col = PM.GetConnectedPlayers().ToArray();
+
+        foreach(var item in col)
+        {
+            if(item != null)
+            {
+                Debug.Log(item);
+                if(item != this)
+                {
+                    item.StartCoroutine(item.ActivateImage());
+                    
+                }
+                    
+            }
+            
+        }
+
+
+        //NetworkObject otherPlayer = null; 
+
+
+        //foreach (var item in Runner.ActivePlayers)
+        //{
+        //    otherPlayer = Runner.GetPlayerObject(item);
+        //    if(otherPlayer != null)
+        //    {
+        //        if (otherPlayer.IsProxy) break;
+        //    }
+            
+        //}
+
+        //if(otherPlayer != null)
+        //{
+        //    StartCoroutine(ActivateImage(otherPlayer.GetComponent<PlayerModel>()));
+        //    //if (otherPlayer.HasInputAuthority)
+        //    //{
+                
+        //    //}
+        //}      
+
+        
     }
 }
