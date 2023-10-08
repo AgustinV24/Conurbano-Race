@@ -13,6 +13,7 @@ public class PlayerModel : NetworkBehaviour
     public NetworkRigidbody kartRigidbody;     // Referencia al componente Rigidbody del auto
     public Item _currentItem;
     public NetworkInputData _inputData;
+    public NetworkMecanimAnimator myAnim;
     public float rotationThreshold = 0.001f;
     public Item[] items = new Item[1];
 
@@ -57,7 +58,7 @@ public class PlayerModel : NetworkBehaviour
     }
     private IEnumerator Start()
     {
-        yield return new WaitForSeconds(.2f);
+        yield return new WaitForSeconds(.5f);
         if (PM.GetConnectedPlayers().Count == 1)
         {
             transform.position = PM.spawnPoints[1].position;
@@ -170,7 +171,10 @@ public class PlayerModel : NetworkBehaviour
     public IEnumerator MovementLimiting()
     {        
         canMove = false;
-        yield return new WaitForSeconds(100f);
+        myAnim.Animator.SetBool("Active", true);
+        yield return new WaitForSeconds(0.2f);
+        myAnim.Animator.SetBool("Active", false);
+        yield return new WaitForSeconds(1.8f);        
         canMove = true;
     }
 

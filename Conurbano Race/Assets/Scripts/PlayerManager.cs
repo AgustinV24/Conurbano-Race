@@ -10,6 +10,7 @@ public class PlayerManager : NetworkBehaviour
 
     SpawnNetworkPlayer _snp;
     public Transform[] spawnPoints;
+    public Transform[] checkPoints;
     [Networked] public int index { get; set; }
     void Start()
     {
