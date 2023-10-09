@@ -9,7 +9,7 @@ public class LapController : MonoBehaviour
     public Transform[] checkpoints; 
 
     [SerializeField] private int currentLap = 0; 
-    private int currentCheckpoint = 0;
+    public int currentCheckpoint = 0;
 
     [SerializeField] PlayerModel pl;
 

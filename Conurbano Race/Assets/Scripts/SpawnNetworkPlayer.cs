@@ -20,7 +20,7 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
 
         if (runner.Topology == SimulationConfig.Topologies.Shared) 
         {            
-            runner.Spawn(_playerPrefab, Vector3.zero, Quaternion.identity, runner.LocalPlayer);
+            runner.Spawn(_playerPrefab, manager.spawnPoints[0].position, manager.spawnPoints[0].rotation, runner.LocalPlayer);
         }
     }
 

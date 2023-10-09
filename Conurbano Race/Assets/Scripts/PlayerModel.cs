@@ -4,6 +4,7 @@ using UnityEngine;
 using Fusion;
 using System.Linq;
 using UnityEngine.UI;
+
 public class PlayerModel : NetworkBehaviour
 {
     public float speed = 10f;             // Velocidad de movimiento del auto
@@ -37,7 +38,7 @@ public class PlayerModel : NetworkBehaviour
     public Image itemImage;
     public PlayerManager PM;
     [SerializeField] SpawnNetworkPlayer _snp;
-
+    [SerializeField] MeshRenderer _car;
     [Networked] public bool winner { get; set; }
     public override void Spawned()
     {
@@ -54,6 +55,8 @@ public class PlayerModel : NetworkBehaviour
         {
             _camera.SetActive(false);
         }
+
+        _car.material.color = Random.ColorHSV();
 
      
     }
@@ -78,6 +81,14 @@ public class PlayerModel : NetworkBehaviour
         {
             call = false;
             DetectOtherPLayers();
+        }
+        if (Physics.Raycast(transform.position, Vector3.down, Mathf.Infinity, 10))
+        {
+
+        }
+        else
+        {
+            Debug.Log("Auch");
         }
     }
 
@@ -124,7 +135,7 @@ public class PlayerModel : NetworkBehaviour
         }
         if (zAxis < 0)
         {
-            movement = transform.forward * zAxis * speed/3 * Time.fixedDeltaTime;
+            movement = transform.forward * zAxis * speed/1.5f* Time.fixedDeltaTime;
         }        
         else
         {
@@ -133,9 +144,9 @@ public class PlayerModel : NetworkBehaviour
 
         kartRigidbody.Rigidbody.AddForce(movement, ForceMode.Impulse);
 
-        float speedReduction = 100 - Mathf.Clamp(Vector3.Angle(transform.forward, kartRigidbody.Rigidbody.velocity), 0, 70);
-        if(!_inputData.isBeingBoosted)
-            kartRigidbody.Rigidbody.velocity = Vector3.ClampMagnitude(kartRigidbody.Rigidbody.velocity, speedReduction);
+        float speedReduction = 30 - Mathf.Clamp(Vector3.Angle(transform.forward, kartRigidbody.Rigidbody.velocity), 0, 10);
+      
+         kartRigidbody.Rigidbody.velocity = Vector3.ClampMagnitude(kartRigidbody.Rigidbody.velocity, 25);
 
 
         
