@@ -7,12 +7,12 @@ using UnityEngine.UI;
 
 public class PlayerModel : NetworkBehaviour
 {
-    public float speed = 10f;             // Velocidad de movimiento del auto
-    public float rotationSpeed = 100f;    // Velocidad de rotación del auto
-
-    private float horizontalInput;        // Entrada horizontal (izquierda/derecha)
-    private float verticalInput;          // Entrada vertical (adelante/atrás)
-    public NetworkRigidbody kartRigidbody;     // Referencia al componente Rigidbody del auto
+    public float speed = 10f;             
+                 
+    public float rotationSpeed = 100f;    
+    private float horizontalInput;        
+    private float verticalInput;          
+    public NetworkRigidbody kartRigidbody;     
     public Item _currentItem;
     public NetworkInputData _inputData;
     public NetworkMecanimAnimator myAnim;
@@ -117,39 +117,38 @@ public class PlayerModel : NetworkBehaviour
             UpdateCanvas();
         }
     }
-    void FixedUpdate()
-    {
-
-        // Calcular la velocidad de movimiento
-
-    }
+    
     void Move(float xAxis, float zAxis)
     {
         
         Vector3 movement = Vector3.zero;
         
 
-        if(Mathf.Abs(zAxis) == 0)
+        if(zAxis == 0)
         {
             kartRigidbody.Rigidbody.velocity = Vector3.Lerp(kartRigidbody.Rigidbody.velocity, Vector3.zero, 0.015f);
         }
         if (zAxis < 0)
         {
-            movement = transform.forward * zAxis * speed/1.5f* Time.fixedDeltaTime;
+            movement = transform.forward * zAxis * speed * Time.fixedDeltaTime;
+            kartRigidbody.Rigidbody.AddForce(movement, ForceMode.Impulse);
+            kartRigidbody.Rigidbody.velocity = Vector3.ClampMagnitude(kartRigidbody.Rigidbody.velocity, 5);
         }        
         else
         {
             movement = transform.forward * zAxis * speed * Time.fixedDeltaTime;
+            kartRigidbody.Rigidbody.AddForce(movement, ForceMode.Impulse);
+            kartRigidbody.Rigidbody.velocity = Vector3.ClampMagnitude(kartRigidbody.Rigidbody.velocity, 25);
         }
 
-        kartRigidbody.Rigidbody.AddForce(movement, ForceMode.Impulse);
+        
 
         float speedReduction = 30 - Mathf.Clamp(Vector3.Angle(transform.forward, kartRigidbody.Rigidbody.velocity), 0, 10);
-      
-         kartRigidbody.Rigidbody.velocity = Vector3.ClampMagnitude(kartRigidbody.Rigidbody.velocity, 25);
-
 
         
+
+
+
 
         if (canRotate)
         {
@@ -183,6 +182,7 @@ public class PlayerModel : NetworkBehaviour
         obj.transform.parent = this.transform;
         obj.playerM = this;
         obj.sC.enabled = true;
+        RPC_Boke();
         yield return new WaitForSeconds(3f);
         Runner.Despawn(obj.Object);
     }
@@ -213,15 +213,22 @@ public class PlayerModel : NetworkBehaviour
     [Rpc(RpcSources.All, RpcTargets.InputAuthority)]
     public void RPC_End()
     {
+
         canMove = false;
         if (winner)
-        {
+        {            
             winScreen.SetActive(true);
         }
         else
         {
             defeatScreen.SetActive(true);
         }
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.InputAuthority)]
+    public void RPC_Boke()
+    {
+        GetComponent<AudioSource>().Play();
     }
     public void UpdateCanvas()
     {
@@ -261,28 +268,7 @@ public class PlayerModel : NetworkBehaviour
         }
 
 
-        //NetworkObject otherPlayer = null; 
-
-
-        //foreach (var item in Runner.ActivePlayers)
-        //{
-        //    otherPlayer = Runner.GetPlayerObject(item);
-        //    if(otherPlayer != null)
-        //    {
-        //        if (otherPlayer.IsProxy) break;
-        //    }
-            
-        //}
-
-        //if(otherPlayer != null)
-        //{
-        //    StartCoroutine(ActivateImage(otherPlayer.GetComponent<PlayerModel>()));
-        //    //if (otherPlayer.HasInputAuthority)
-        //    //{
-                
-        //    //}
-        //}      
-
+        
         
     }
 }

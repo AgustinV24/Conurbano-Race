@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using UnityEngine.UI;
 
 
 public class LapController : MonoBehaviour
 {
-    public int lapsToWin = 2;
-    public Transform[] checkpoints; 
+    public int lapsToWin = 0;
+    public Transform[] checkpoints;
+    public TextMeshProUGUI text;
 
     [SerializeField] private int currentLap = 0; 
     public int currentCheckpoint = 0;
@@ -16,6 +19,7 @@ public class LapController : MonoBehaviour
     private void Start()
     {
         checkpoints = pl.PM.checkPoints;
+        text.text = "Lap: " + (currentLap + 1) + "/3";
     }
 
     void OnTriggerEnter(Collider other)
@@ -33,8 +37,8 @@ public class LapController : MonoBehaviour
                 if (currentCheckpoint >= checkpoints.Length)
                 {
                     currentLap++;
+                    text.text = "Lap: " + (currentLap + 1) + "/3";
 
-                    
                     if (currentLap >= lapsToWin)
                     {
                         pl.winner = true;
