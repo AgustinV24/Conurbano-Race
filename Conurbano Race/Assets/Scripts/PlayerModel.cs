@@ -43,8 +43,8 @@ public class PlayerModel : NetworkBehaviour
     public override void Spawned()
     {
         PM = FindObjectOfType<PlayerManager>();
-        _snp = FindObjectOfType<SpawnNetworkPlayer>();
-        _snp.OnConnected(GetComponent<NetworkPlayer>());
+        
+        
 
         //  canMove = true;
         items[2] = new SpeedBoost();
@@ -63,6 +63,8 @@ public class PlayerModel : NetworkBehaviour
     private IEnumerator Start()
     {
         yield return new WaitForSeconds(.5f);
+        _snp = FindObjectOfType<SpawnNetworkPlayer>();
+        _snp.OnConnected(GetComponent<NetworkPlayer>());
         if (PM.GetConnectedPlayers().Count == 1)
         {
             transform.position = PM.spawnPoints[1].position;

@@ -16,12 +16,12 @@ public class PlayerManager : NetworkBehaviour
     {
         _snp = FindObjectOfType<SpawnNetworkPlayer>();
 
-        _snp.OnConnected += OnPlayerConnected;     
+        _snp.OnConnected += OnPlayerConnected;
 
-        
+        _snp.manager = this;
     }
 
-    
+
     private void OnPlayerConnected(NetworkPlayer player)
     {
 

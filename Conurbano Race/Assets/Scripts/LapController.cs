@@ -16,10 +16,12 @@ public class LapController : MonoBehaviour
 
     [SerializeField] PlayerModel pl;
 
-    private void Start()
+    private IEnumerator Start()
     {
-        checkpoints = pl.PM.checkPoints;
         text.text = "Lap: " + (currentLap + 1) + "/3";
+        yield return new WaitForSeconds(.2f);
+        checkpoints = pl.PM.checkPoints;
+        
     }
 
     void OnTriggerEnter(Collider other)
