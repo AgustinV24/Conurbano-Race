@@ -20,14 +20,16 @@ public class CharacterInputHandler : MonoBehaviour
     }
     void Update()
     {
-        
-        _inputData.zMovement = Input.GetAxis("Vertical");
-        _inputData.xMovement = Input.GetAxis("Horizontal");
+
+            _inputData.zMovement = Input.GetAxis("Vertical");
+            _inputData.xMovement = Input.GetAxis("Horizontal");
+
 
         
 
         if (!isUsingItem && _pl.hasItem && Input.GetKeyDown(KeyCode.Space))
-        {            
+        {
+            Debug.Log("SPACE");
             isUsingItem = true;            
         }
     }

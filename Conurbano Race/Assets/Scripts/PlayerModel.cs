@@ -12,9 +12,10 @@ public class PlayerModel : NetworkBehaviour
     public float rotationSpeed = 100f;    
     private float horizontalInput;        
     private float verticalInput;          
-    public NetworkRigidbody kartRigidbody;     
-    public Item _currentItem;
-    public NetworkInputData _inputData;
+    public NetworkRigidbody kartRigidbody;
+    [Networked] public int _currentItemIndex{ get; set; }
+    public Item _currentItem{ get; set; }
+     public NetworkInputData _inputData;
     public NetworkMecanimAnimator myAnim;
     public float rotationThreshold = 0.001f;
     public Item[] items = new Item[3];
@@ -28,7 +29,7 @@ public class PlayerModel : NetworkBehaviour
     [Networked]
     public bool canMove { get; set;}
     float forwardSpeed;
-
+ 
     public GameObject inkImage;
     public GameObject winScreen;
     public GameObject defeatScreen;
@@ -60,6 +61,7 @@ public class PlayerModel : NetworkBehaviour
 
      
     }
+    
     private IEnumerator Start()
     {
         yield return new WaitForSeconds(.5f);
@@ -93,7 +95,10 @@ public class PlayerModel : NetworkBehaviour
             Debug.Log("Auch");
         }
     }
+    public void OnChange()
+    {
 
+    }
     public void Quit()
     {
         Runner.Shutdown();
@@ -113,7 +118,8 @@ public class PlayerModel : NetworkBehaviour
         }
 
         if (_inputData.isUsingItem)
-        {            
+        {
+            // Debug.Log(_currentItem);
             _currentItem.Actions(this);
             hasItem = false;
             UpdateCanvas();
@@ -171,6 +177,7 @@ public class PlayerModel : NetworkBehaviour
         StartCoroutine(Cou);
     }
 
+
     public IEnumerator ActivateImage()
     {
         inkImage.SetActive(true);
@@ -180,13 +187,17 @@ public class PlayerModel : NetworkBehaviour
 
     public IEnumerator HornActivation()
     {
-        Horn obj = Runner.Spawn(hornPrefab, transform.position, Quaternion.identity);        
-        obj.transform.parent = this.transform;
-        obj.playerM = this;
-        obj.sC.enabled = true;
-        RPC_Boke();
-        yield return new WaitForSeconds(3f);
-        Runner.Despawn(obj.Object);
+
+            Horn obj = Runner.Spawn(hornPrefab, transform.position, Quaternion.identity);
+            if(HasStateAuthority)
+            obj.transform.parent = this.transform;
+            obj.playerM = this;
+            obj.sC.enabled = true;
+            RPC_Boke();
+            yield return new WaitForSeconds(3f);
+            Runner.Despawn(obj.Object);
+
+
     }
 
     public IEnumerator MovementLimiting()
@@ -205,6 +216,16 @@ public class PlayerModel : NetworkBehaviour
         call = true;
     }
 
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RPC_Box(int index)
+    {
+        _currentItemIndex = index;
+        _currentItem = items[index];
+        //hasItem = true;
+        //UpdateCanvas();
+        itemImage.gameObject.SetActive(true);
+        itemImage.sprite = itemsImages[index];
+    }
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
     public void RPC_Stun()
     {
@@ -272,5 +293,17 @@ public class PlayerModel : NetworkBehaviour
 
         
         
+    }
+
+    public void Shutdown()
+    {
+        if(HasStateAuthority && HasInputAuthority)
+        {
+
+        }
+        else if(!HasStateAuthority && HasInputAuthority)
+        {
+
+        }
     }
 }

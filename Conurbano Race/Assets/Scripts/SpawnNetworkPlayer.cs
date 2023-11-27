@@ -4,6 +4,7 @@ using UnityEngine;
 using Fusion;
 using Fusion.Sockets;
 using System;
+using UnityEngine.SceneManagement;
 
 public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
 {   
@@ -15,7 +16,7 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
     
     CharacterInputHandler _characterInputs;
     
-
+   
     //public void OnConnectedToServer(NetworkRunner runner)
     //{
 
@@ -62,6 +63,7 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
     {
         //OnDisconnected(_playerPrefab.GetComponent<NetworkPlayer>());
         runner.Shutdown();
+        
     
     }
 
@@ -77,11 +79,19 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnConnectedToServer(NetworkRunner runner) { }
 
-    public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
+    public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) 
+    {
+
+    }
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
 
-    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    {
+        runner.Disconnect(player);
+        SceneManager.LoadScene("MainMenu");
+        
+    }
 
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data) { }
 
@@ -91,7 +101,10 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
 
-    public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
+    public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
+    {
+        //SceneManager.LoadScene("MainMenu");
+    }
 
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
 
