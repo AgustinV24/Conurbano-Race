@@ -59,6 +59,11 @@ public class PlayerModel : NetworkBehaviour
 
         _car.material.color = Random.ColorHSV();
 
+        if(HasInputAuthority && !HasStateAuthority)
+        {
+            canMove = true;
+        }
+
      
     }
     

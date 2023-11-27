@@ -15,6 +15,8 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
     public PlayerManager manager;
     
     CharacterInputHandler _characterInputs;
+
+    private Dictionary<PlayerRef, NetworkPlayer> _spawnedPlayers = new Dictionary<PlayerRef, NetworkPlayer>();
     
    
     //public void OnConnectedToServer(NetworkRunner runner)
@@ -34,13 +36,15 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
                 //var play = runner.Spawn(_playerPrefab, null, null, player);
                 //var play = runner.Spawn(_playerPrefab, manager.spawnPoints[0].position, manager.spawnPoints[0].rotation, player);
                 StartCoroutine(SpawnPlayers(runner, player));
+                
         }
     }
 
     IEnumerator SpawnPlayers(NetworkRunner runner, PlayerRef player)
     {
         yield return new WaitForSeconds(1);
-        var play = runner.Spawn(_playerPrefab, manager.spawnPoints[0].position, manager.spawnPoints[0].rotation, player);
+        NetworkPlayer play = runner.Spawn(_playerPrefab, manager.spawnPoints[0].position, manager.spawnPoints[0].rotation, player);
+        _spawnedPlayers.Add(player, play);
     }
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
@@ -67,9 +71,24 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
     
     }
 
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    {
+        
+
+        if (_spawnedPlayers.TryGetValue(player, out NetworkPlayer play))
+        {
+            runner.Despawn(play.Object);
+            _spawnedPlayers.Remove(player);
+        }
+
+        //runner.Disconnect(player);
+        //SceneManager.LoadScene("MainMenu");
+
+    }
+
     #region Callbacks sin usar
 
-    
+
 
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
 
@@ -86,12 +105,7 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
 
-    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
-    {
-        runner.Disconnect(player);
-        SceneManager.LoadScene("MainMenu");
-        
-    }
+    
 
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data) { }
 
@@ -103,7 +117,7 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
-        //SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
