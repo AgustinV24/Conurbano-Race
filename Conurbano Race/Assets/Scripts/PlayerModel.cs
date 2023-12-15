@@ -59,10 +59,6 @@ public class PlayerModel : NetworkBehaviour
 
         _car.material.color = Random.ColorHSV();
 
-        if(HasInputAuthority && !HasStateAuthority)
-        {
-            canMove = true;
-        }
 
      
     }
@@ -106,7 +102,7 @@ public class PlayerModel : NetworkBehaviour
     }
     public void Quit()
     {
-        Runner.Shutdown();
+       // Runner.Shutdown();
         Application.Quit();
     }
     
@@ -231,7 +227,7 @@ public class PlayerModel : NetworkBehaviour
         itemImage.gameObject.SetActive(true);
         itemImage.sprite = itemsImages[index];
     }
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_Stun()
     {
         kartRigidbody.Rigidbody.velocity = Vector3.zero;
@@ -253,7 +249,7 @@ public class PlayerModel : NetworkBehaviour
         }
     }
 
-    [Rpc(RpcSources.All, RpcTargets.InputAuthority)]
+    [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_Boke()
     {
         GetComponent<AudioSource>().Play();

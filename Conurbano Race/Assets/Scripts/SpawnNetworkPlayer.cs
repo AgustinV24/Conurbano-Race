@@ -73,16 +73,20 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-        
+
+
 
         if (_spawnedPlayers.TryGetValue(player, out NetworkPlayer play))
         {
             runner.Despawn(play.Object);
             _spawnedPlayers.Remove(player);
+            runner.Shutdown();
         }
 
+        //Debug.Log("A");
+
         //runner.Disconnect(player);
-        //SceneManager.LoadScene("MainMenu");
+        //
 
     }
 
@@ -117,6 +121,7 @@ public class SpawnNetworkPlayer : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
+        
         SceneManager.LoadScene("MainMenu");
     }
 

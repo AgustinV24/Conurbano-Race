@@ -49,8 +49,8 @@ public class NetworkPlayer : NetworkBehaviour
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
         OnPlayerLeft();
-        Runner.Despawn(Object);
-
+        Runner.Shutdown();
+        Application.Quit();
        
     }
     

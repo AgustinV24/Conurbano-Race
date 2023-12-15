@@ -70,15 +70,7 @@ public class NetworkHandler : MonoBehaviour, INetworkRunnerCallbacks
             SceneManager = sceneObj
         });
 
-        
-        if (result.Ok)
-        {
-            Debug.Log("Creaste/te uniste al juego correctamente");
-        }
-        else
-        {
-            Debug.LogError("No se pudo crear/unirse al juego correctamente");
-        }
+
     }
 
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
