@@ -11,7 +11,7 @@ public class LapController : MonoBehaviour
     public Transform[] checkpoints;
     public TextMeshProUGUI text;
 
-    [SerializeField] private int currentLap = 0; 
+    [SerializeField] public int currentLap = 0; 
     public int currentCheckpoint = 0;
 
     [SerializeField] PlayerModel pl;
@@ -24,6 +24,11 @@ public class LapController : MonoBehaviour
         
     }
 
+
+    public void RPC_UpdateText()
+    {
+        text.text = "Lap: " + (currentLap + 1) + "/3";
+    }
     void OnTriggerEnter(Collider other)
     {
         

@@ -1027,6 +1027,7 @@ MonoBehaviour:
   speed: 15
   rotationSpeed: 60
   kartRigidbody: {fileID: 2925161845743145026}
+  __currentItemIndex: 0
   myAnim: {fileID: 9021795443214862542}
   rotationThreshold: 0.001
   itemsImages:
@@ -1158,7 +1159,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2dbc9c3af1405d4f982f6e00483c830, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lapsToWin: 3
+  lapsToWin: 1
   checkpoints: []
   text: {fileID: 7604687421622645400}
   currentLap: 0

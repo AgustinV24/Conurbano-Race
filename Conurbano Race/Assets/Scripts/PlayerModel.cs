@@ -41,6 +41,8 @@ public class PlayerModel : NetworkBehaviour
     [SerializeField] SpawnNetworkPlayer _snp;
     [SerializeField] MeshRenderer _car;
     [Networked] public bool winner { get; set; }
+    Transform initialPos;
+    LapController lapController;
     public override void Spawned()
     {
         PM = FindObjectOfType<PlayerManager>();
@@ -66,11 +68,18 @@ public class PlayerModel : NetworkBehaviour
     private IEnumerator Start()
     {
         yield return new WaitForSeconds(.5f);
+        lapController = GetComponent<LapController>();
         _snp = FindObjectOfType<SpawnNetworkPlayer>();
         _snp.OnConnected(GetComponent<NetworkPlayer>());
         if (PM.GetConnectedPlayers().Count == 1)
         {
+            initialPos = PM.spawnPoints[1];
             transform.position = PM.spawnPoints[1].position;
+
+        }
+        else
+        {
+            initialPos = PM.spawnPoints[0];
         }
     }
     public void Update()
@@ -237,16 +246,7 @@ public class PlayerModel : NetworkBehaviour
     [Rpc(RpcSources.All, RpcTargets.InputAuthority)]
     public void RPC_End()
     {
-
-        canMove = false;
-        if (winner)
-        {            
-            winScreen.SetActive(true);
-        }
-        else
-        {
-            defeatScreen.SetActive(true);
-        }
+        StartCoroutine(EndRoutine());
     }
 
     [Rpc(RpcSources.All, RpcTargets.All)]
@@ -271,6 +271,41 @@ public class PlayerModel : NetworkBehaviour
         {
             itemImage.gameObject.SetActive(false);
         }
+    }
+
+    IEnumerator EndRoutine()
+    {
+        canMove = false;
+        if (winner)
+        {
+            winScreen.SetActive(true);
+        }
+        else
+        {
+            defeatScreen.SetActive(true);
+        }
+        yield return new WaitForSeconds(5f);
+        RPC_InitialConfig();
+        canMove = true;
+        if (winner)
+        {
+            winScreen.SetActive(false);
+        }
+        else
+        {
+            defeatScreen.SetActive(false);
+        }
+        winner = false;
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    void RPC_InitialConfig()
+    {
+        transform.position = initialPos.position;
+        transform.rotation = initialPos.rotation;
+        lapController.currentCheckpoint = 0;
+        lapController.currentLap = 0;
+        lapController.text.text = "Lap: " + (1) + "/3";
     }
     public void DetectOtherPLayers()
     {
