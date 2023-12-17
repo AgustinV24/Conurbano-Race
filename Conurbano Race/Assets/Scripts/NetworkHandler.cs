@@ -31,7 +31,7 @@ public class NetworkHandler : MonoBehaviour, INetworkRunnerCallbacks
 
     async Task JoinLobbyTask()
     {
-        var result = await _currentRunner.JoinSessionLobby(SessionLobby.Custom, "Normal Lobby");
+        var result = await _currentRunner.JoinSessionLobby(SessionLobby.ClientServer, "Normal Lobby");
 
         if (result.Ok)
         {
@@ -51,7 +51,7 @@ public class NetworkHandler : MonoBehaviour, INetworkRunnerCallbacks
     public void JoinGame(SessionInfo sessionInfo)
     {
         Debug.Log(sessionInfo.Name);
-        var clientTask = InitializeGame(GameMode.Client, sessionInfo.Name);
+       var clientTask = InitializeGame(GameMode.AutoHostOrClient, sessionInfo.Name);
     }
 
 
@@ -81,7 +81,7 @@ public class NetworkHandler : MonoBehaviour, INetworkRunnerCallbacks
         {
             SessionInfo session = sessionList[0];
 
-            JoinGame(session);
+            //JoinGame(session);
         }
     }
 

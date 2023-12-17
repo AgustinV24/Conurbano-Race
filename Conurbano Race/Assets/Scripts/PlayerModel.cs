@@ -43,6 +43,10 @@ public class PlayerModel : NetworkBehaviour
     [Networked] public bool winner { get; set; }
     Transform initialPos;
     LapController lapController;
+    [SerializeField] AudioSource a1;
+    [SerializeField] AudioSource a2;
+    [Networked] public float rbVelocity { get; set; }
+
     public override void Spawned()
     {
         PM = FindObjectOfType<PlayerManager>();
@@ -85,8 +89,8 @@ public class PlayerModel : NetworkBehaviour
     public void Update()
     {
         forwardSpeed = Vector3.Dot(kartRigidbody.Rigidbody.velocity, transform.forward);
-
-        
+        RPC_Vel();
+        RPC_Sounds();
         canRotate = Mathf.Abs(forwardSpeed) > rotationThreshold;
         if(_currentItem != null)
         item = _currentItem.ToString();
@@ -249,10 +253,40 @@ public class PlayerModel : NetworkBehaviour
         StartCoroutine(EndRoutine());
     }
 
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)]
+    public void RPC_Vel()
+    {
+        rbVelocity = kartRigidbody.Rigidbody.velocity.magnitude;
+    }
+
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_Boke()
     {
         GetComponent<AudioSource>().Play();
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_Sounds()
+    {
+        if (rbVelocity > 0 && canMove)
+        {
+
+            Debug.Log("ADAAAAAAA");
+            if (!a1.isPlaying)
+            {
+                a1.Play();
+            }
+            a1.volume = rbVelocity / 25;
+        }
+        else
+        {
+            a1.Stop();
+        }
+        if (rbVelocity > 20f && Mathf.Abs(_inputData.xMovement) > 0.9f && !a2.isPlaying)
+        {
+            a2.Play();
+        }
     }
     public void UpdateCanvas()
     {

@@ -25,10 +25,11 @@ public class SessionItem : MonoBehaviour
 
         _joinButton.enabled = sessionInfo.PlayerCount < sessionInfo.MaxPlayers;
 
-        _joinButton.onClick.AddListener(OnClick);
+        //   _joinButton.onClick.AddListener(OnClick);
+        //_joinButton.onClick = OnClick();
     }
 
-    void OnClick()
+    public void OnClick()
     {
         OnJoinedSession?.Invoke(_currentSessionInfo);
     }
